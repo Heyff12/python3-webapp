@@ -53,6 +53,7 @@ async def cookie2user(cookie_str):
     '''
     Parse cookie and load user if cookie is valid.
     '''
+    logging.info('cookie2user cookie_str: %s' % cookie_str)
     if not cookie_str:
         return None
     try:
