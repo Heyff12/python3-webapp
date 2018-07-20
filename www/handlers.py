@@ -48,12 +48,12 @@ def text2html(text):
     lines = map(lambda s: '<p>%s</p>' % s.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;'), filter(lambda s: s.strip() != '', text.split('\n')))
     return ''.join(lines)
 
-@asyncio.coroutine
+# @asyncio.coroutine
 async def cookie2user(cookie_str):
     '''
     Parse cookie and load user if cookie is valid.
     '''
-    logging.info('cookie2user cookie_str: %s' % cookie_str)
+    logging.info('handlers cookie2user cookie_str: %s' % cookie_str)
     if not cookie_str:
         return None
     try:
@@ -61,16 +61,21 @@ async def cookie2user(cookie_str):
         if len(L) != 3:
             return None
         uid, expires, sha1 = L
+        logging.info('handlers cookie2user uid: %s' % uid)
+        logging.info('handlers cookie2user expires: %s' % expires)
         if int(expires) < time.time():
             return None
         user = await User.find(uid)
+        logging.info('handlers cookie2user user: %s' % user)
         if user is None:
             return None
         s = '%s-%s-%s-%s' % (uid, user.passwd, expires, _COOKIE_KEY)
+        logging.info('handlers cookie2user s: %s' % s)
         if sha1 != hashlib.sha1(s.encode('utf-8')).hexdigest():
             logging.info('invalid sha1')
             return None
         user.passwd = '******'
+        logging.info('handlers cookie2user user: %s' % user)
         return user
     except Exception as e:
         logging.exception(e)

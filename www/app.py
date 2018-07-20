@@ -46,11 +46,14 @@ def init_jinja2(app, **kw):
     logging.info('set jinja2 template path: %s' % path)
     env = Environment(loader=FileSystemLoader(path), **options)
     logging.info('init_jinja2 env: %s' % env)
+    logging.info('init_jinja2 env.filters: %s' % env.filters)
     filters = kw.get('filters', None)
     logging.info('init_jinja2 filters: %s' % filters)
     logging.info('init_jinja2 filters.items(): %s' % filters.items())
     if filters is not None:
         for name, f in filters.items():
+            logging.info('init_jinja2 name: %s' % name)
+            logging.info('init_jinja2 f: %s' % f)
             env.filters[name] = f
     app['__templating__'] = env
 
@@ -59,6 +62,7 @@ def init_jinja2(app, **kw):
 def logger_factory(app, handler):
     @asyncio.coroutine
     def logger(request):
+        logging.info('app logger_factory Request: %s' % request)
         logging.info('Request: %s %s' % (request.method, request.path))
         # yield from asyncio.sleep(0.3)
         return (yield from handler(request))
@@ -72,6 +76,7 @@ def auth_factory(app, handler):
         logging.info('check user: %s %s' % (request.method, request.path))
         request.__user__ = None
         cookie_str = request.cookies.get(COOKIE_NAME)
+        logging.info('APP auth_factory cookie_str: %s' % cookie_str)
         if cookie_str:
             user = yield from cookie2user(cookie_str)
             if user:
@@ -143,7 +148,9 @@ def response_factory(app, handler):
 
 
 def datetime_filter(t):
+    logging.info('app datetime_filter t: %s' % t)
     delta = int(time.time() - t)
+    logging.info('app datetime_filter delta: %s' % delta)
     if delta < 60:
         return u'1分钟前'
     if delta < 3600:
@@ -153,6 +160,7 @@ def datetime_filter(t):
     if delta < 604800:
         return u'%s天前' % (delta // 86400)
     dt = datetime.fromtimestamp(t)
+    logging.info('app datetime_filter delta: %s年%s月%s日' % (dt.year, dt.month, dt.day))
     return u'%s年%s月%s日' % (dt.year, dt.month, dt.day)
 
 
